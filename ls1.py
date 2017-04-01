@@ -202,8 +202,37 @@ for line in f:
 
 #3.3 Text Processing with Unicode
 
+#how to use Unicode for processing texts that use non-ASCII character sets.
+# Unicode supports over 1m characters, each character is assigned a number called a code point.
+# in python code units are written in the form \uXXXX, where XXXX is a 4 digit hexadecimal form
+#Some encodings (such as ASCII and Latin-2) use a single byte per code point,so they can support only a small subset of Unicode, enough for a single language
+#Other encodings (such as UTF-8) use multiple bytes and can represent the full range of Unicode characters
+
+# Python codecs module -functions for reading encoded data into Unicode writing strings in encoded form
+import codecs
+path = nltk.data.find('corpora/unicode_samples/polish-lat2.txt')
+f = codecs.open(path, encoding ='latin2')
 
 
+#Regular Expressions for Detecting Word Patterns
+import re
+wordlist = [w for w in nltk.corpus.words.words('en') if w.islower()]
+
+[w for w in wordlist if re.search('ed$', w)]  #find words ending ed in string w, -dollar sign matches end of the word
+jio = [w for w in wordlist if re.search('^..j..t..$', w)]  #get a word ..j..t..
+sum(1 for w in text if re.search('^e-?mail$', w))  #? -previous character is optional, ^ -start of string, $ - end of string
+[w for w in wordlist if re.search('^[ghi][mno][jlk][def]$', w)] #words that have either of 3 chars, orderlessly
+
+#Application of regex, -the r' makes python diff regex from normal strings
+word = 'supercalifragilisticexpialidocious'
+re.findall(r'[aeiou]', word) #finds all vowels in the word
 
 
-
+#Finding Word Stems
+def stem(word):
+    for suffix in ['ing', 'ly','ed','ious','ies','ive','es','s','ment']:
+        if word.endswith(suffix):
+            return word[:-len(suffix)]
+        return word
+#We can use regex to do the above
+re.findall(r'^.*(ing|ly|ed|ious|ies|ive|es|s|ment)$', 'processing')
