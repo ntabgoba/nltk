@@ -236,3 +236,174 @@ def stem(word):
         return word
 #We can use regex to do the above
 re.findall(r'^.*(ing|ly|ed|ious|ies|ive|es|s|ment)$', 'processing')
+
+def stem(word):
+    regexp = r'^(.*?)(ing|ly|ed|ious|ies|ive|es|s|ment)?$'
+    stem, suffix = re.findall(regexp, word)[0]
+    return stem
+
+#3.6 Normalizing Text -put to lower, then stemmed (strip any affixes), -Lemmatization -put in dictionary form
+# NLTK's Stemmers -PorterStemmer() and LancasterStemmer()
+porter = nltk.PorterStemmer() #Good if you are indexing some texts and want to support search using alternative forms of words
+lancaster = nltk.LancasterStemmer()
+raw = """DENNIS: Listen, strange women lying in ponds distributing swords
+     is no basis for a system of government. Supreme executive power derives from
+     a mandate from the masses, not from some farcical aquatic ceremony."""
+tokens = nltk.word_tokenize(raw)
+[porter.stem(t) for t in tokens]
+
+#Lemmatization -WordNet lemmatizer 
+wnl = nltk.WordNetLemmatizer()  # if you want to compile the vocabulary of some texts and want a list of valid lemmas
+[wnl.lemmatize(t) for t in tokens]
+
+#3.7 Regular Expresssions for Tokenizing Text
+# simple approach - split on whitespace
+raw = """'When I'M a Duchess,' she said to herself, (not in a very hopeful tone though), 'I won't have any pepper in my kitchen AT ALL. Soup does very
+            well without--Maybe it's always pepper that makes people hot-tempered,'..."""
+re.split(r' ',raw)
+re.split(r'[ \t\n]+', raw)  #matches one or more spaces i.e tabs, newlines
+re.split(r'\W+', raw)  #\W split input on anything other than a word character \W = [a-zA-Z0-9]
+
+nltk.regexp_tokenize()  # is more efficient for this task,
+text = 'That U.S.A. poster-print costs $12.40..'
+
+pattern = r'''(?x)          
+    ([A-Z]\.)+          
+  | \w+(-\w+)*       
+  | \$?\d+(\.\d+)?%?  
+  | \.\.\.            
+  | [][.,;"'?():-_`]  
+'''
+nltk.regexp_tokenize(text, pattern)  #didnt work
+
+#Segmentation -Sentence segemantation -word segmentation
+sent_tokenizer=nltk.data.load('tokenizers/punkt/english.pickle') 
+text = nltk.corpus.gutenberg.raw('chesterton-thursday.txt')
+sents = sent_tokenizer.tokenize(text)
+pprint.pprint(sents[171:181])
+
+#3.9 Formatting: From Lists to Strings
+silly = ['We', 'called', 'him', 'Tortoise', 'because', 'he', 'taught', 'us', '.']
+' '.join(silly)
+
+
+fdist = nltk.FreqDist(['dog', 'cat', 'dog', 'cat', 'dog', 'snake', 'dog', 'cat'])
+for word in fdist:
+    print word, '->', fdist[word], ';',
+# dog -> 4 ; cat -> 3 ; snake -> 1 ;
+
+
+
+#4 Writing Structured Programs
+#When we assign bar = foo, it is just the object reference 3133 that gets copied
+foo = ['Monty','Python']
+bar = foo
+foo[1] = 'Bodkin'
+bar
+
+#To copy the items from a list foo to a new list bar
+bar = foo[:]  #copies the object references inside the list
+
+#dir() Returns the attributes of the object or module.
+dir(__builtins__)  # return objects in current scope i.e "__builtin__", "__doc__", "__name__" and "__package__". 
+#help()	Returns the python built in documentation about the object.
+
+#type()	    Returns the type of object.-help related to python module, object  or method
+
+#__doc__	    Returns the doc-string of object or module.
+print list.__doc__
+
+#Conditionals
+# In the condition part of an if statement, a non-empty string or list is evaluated as true, while an empty string or list evaluates as false
+
+mixed = ['cat', '', ['dog'], []] 
+for element in mixed:
+    if element:
+        print element
+#to check whether all or any items meet some condition:
+all()
+any()
+sent = ['No', 'good', 'fish', 'goes', 'anywhere', 'without', 'a', 'porpoise', '.']
+all(len(w) > 4 for w in sent) #false
+any(len(w) > 4 for w in sent) #true
+
+#Sequences
+#strings&lists, -Tuple -> formed with a comma operator -indexed,sliced&have length
+t = 'walk','fem', 3
+
+
+for item in set(s).difference(t) #Iterate over elements of s not in t
+for item in random.shuffle(s) #Iterate over elements of s in random order
+
+':'.join(words)  #convert a list of strings to a single string 
+
+#re-arrange contents of a list
+words = ['I', 'turned', 'off', 'the', 'spectroroute']
+words[2], words[3], words[4] = words[3], words[4], words[2]               
+                          
+#zip() -zips two or more sequences together into a single list of pairs
+words = ['I', 'turned', 'off', 'the', 'spectroroute']  
+tags = ['noun', 'verb', 'prep', 'det', 'noun']
+zip(words, tags)
+#enumerate(s) - returns pairs consisting of an index and the item at that index
+list(enumerate(words))                       
+                          
+#Combining different Sequence Types
+words = 'I turned off the spectroroute'.split()    #a string is a object with methods defined in it, eg split()
+wordlens = [(len(word), word) for word in words]   #use list compr to build a list of typles
+wordlens.sort()                                     #sort list
+' '.join(w for (_, w) in wordlens)                  #join words back into a single string
+
+#lists -same type and arbitrary length (mutable-modifiable), tuple - different types of fixed length(immutable)
+
+#Generator expression
+max(w.lower() for w in nltk.word_tokenize(text)) #normalize and tokenize using list compr, then we get max
+
+#STYLE
+#“bible” of programming, a 2,500 page multivolume work by Donald Knuth, is called The Art of Computer Pro- gramming. 
+
+#PROCEDURAL Vs DECLARATIVE STYLE
+#Procedural -dictating machine operations step by step i.e count -keep track of tokesn seen & total-combined length of all words
+tokens = nltk.corpus.brown.words(categories='news')
+count = 0
+total = 0
+for token in tokens:
+    count += 1
+    total += len(token)
+print total / count     #4.2765382469
+
+#Declarative  -does same thing as above
+total = sum(len(t) for t in tokens)  #generator expression to sum the token lengths
+print total/len(tokens)
+
+
+#FreqDist summary 
+fd = nltk.FreqDist(nltk.corpus.brown.words()) 
+cumulative = 0.0
+for rank, word in enumerate(fd):
+    cumulative += fd[word] * 100 / fd.N()
+    print "%3d %6.2f%% %s" % (rank+1, cumulative, word) 
+    if cumulative > 25:
+        break
+    
+#Functions
+import re
+def get_text(file):
+    """Read text from a file, normalizing whitespace and stripping HTML markup."""
+    text = open(file).read()
+    text = re.sub('\s+', ' ', text)  #strip whitespaces \s
+    text = re.sub(r'<.*?>', ' ', text) #strip markpus <.*?>
+    return text
+
+#NB A python function does not require to have a return statement. 
+# Some functions do a side effect - printing result, modifying a file, updating contents of a parameter to a function (such functions are called "procedures" in other prog languages)
+
+def my_sort1(mylist):      # good: modifies its argument, no return value
+    mylist.sort()
+def my_sort2(mylist):       # good: doesn't touch its argument, returns value 
+    return sorted(mylist)
+def my_sort3(mylist):      # bad: modifies its argument and also returns it
+    mylist.sort() 
+    return mylist
+
+
